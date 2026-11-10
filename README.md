@@ -61,6 +61,7 @@ npm run server:build
 ## Important deployment notes
 - Deploy the project to Vercel. The `api/contact.ts` function serves `POST /api/contact`; local development uses the Express API.
 - In Vercel Project Settings → Environment Variables, set `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY`, and `CLIENT_ORIGIN` (for example, `https://saurav-react-portfolio.vercel.app`). Set them for Production, then redeploy.
+- Automatic production deployment runs from `.github/workflows/deploy.yml` on every push to `main`. Add GitHub Actions repository secrets named `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. Create the token in Vercel and get the organization and project IDs from `.vercel/project.json` after linking the project with `vercel link`. You can also start a deployment from the workflow's **Run workflow** button.
 - Configure EmailJS template variables `from_name`, `reply_to`, `subject`, and `message`. Keep the template's **To Email** set to your inbox.
 - The contact route validates input and applies basic per-instance throttling. Protect your EmailJS account with usage limits and monitor usage.
 - Update placeholder social URLs and add your real resume PDF at `public/Saurav_Verma_Resume.pdf`.
