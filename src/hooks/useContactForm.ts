@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
 import {
-  EmailServiceConfigurationError,
-  sendContactEmail,
-} from "../services/contactEmailService";
-import type { ContactMessage } from "../services/contactEmailService";
+  ContactSubmissionError,
+  sendContactMessage,
+  type ContactMessage,
+} from "../services/contactApi";
 
 type SubmissionResult = {
   type: "success" | "error";
@@ -29,17 +29,17 @@ export function useContactForm() {
 
     setSending(true);
     try {
-      await sendContactEmail(contact);
+      await sendContactMessage(contact);
       form.reset();
       setResult({
         type: "success",
         message: "Thanks! Your message has been sent.",
       });
     } catch (error) {
-      if (error instanceof EmailServiceConfigurationError) {
+      if (error instanceof ContactSubmissionError) {
         setResult({ type: "error", message: error.message });
       } else {
-        console.error("EmailJS error:", error);
+        console.error("Contact API error:", error);
         setResult({
           type: "error",
           message:

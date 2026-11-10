@@ -14,7 +14,7 @@ npm install
 ```
 
 ## 2. Configure EmailJS
-EmailJS sends the contact form message to your inbox. The EmailJS browser SDK does not require a separate mail server.
+The contact form submits to the backend, which sends the message through EmailJS. EmailJS credentials stay on the server and are never included in the frontend bundle.
 
 1. Create a free account at https://www.emailjs.com/
 2. Add an Email Service and connect the inbox where you want to receive messages.
@@ -24,18 +24,19 @@ EmailJS sends the contact form message to your inbox. The EmailJS browser SDK do
    - `{{reply_to}}`
    - `{{subject}}`
    - `{{message}}`
-5. Find your Service ID, Template ID and Public Key in the EmailJS dashboard.
+5. Find your Service ID, Template ID, Public Key, and Private Key in the EmailJS dashboard.
 6. Copy `.env.example` to `.env` and replace the placeholder values:
 
 ```env
-VITE_EMAILJS_SERVICE_ID=service_xxxxx
-VITE_EMAILJS_TEMPLATE_ID=template_xxxxx
-VITE_EMAILJS_PUBLIC_KEY=your_public_key
+EMAILJS_SERVICE_ID=service_xxxxx
+EMAILJS_TEMPLATE_ID=template_xxxxx
+EMAILJS_PUBLIC_KEY=your_public_key
+EMAILJS_PRIVATE_KEY=your_private_key
 PORT=4000
 CLIENT_ORIGIN=http://localhost:5173
 ```
 
-Only use the EmailJS **Public Key** in the Vite app. Never put an EmailJS private key, SMTP password, or other secret in a `VITE_` variable.
+Never put an EmailJS private key, SMTP password, or other secret in a `VITE_` variable.
 
 ## 3. Run frontend and backend
 ```bash
@@ -45,27 +46,25 @@ npm run dev
 - API health check: http://localhost:4000/api/health
 - Projects API: http://localhost:4000/api/projects
 
-The Vite dev server proxies `/api` requests to the Express API.
+The Vite dev server proxies `/api` requests to the Express API. The contact endpoint is `POST /api/contact`.
 
 ## 4. Production build
 ```bash
 npm run build
 ```
-Vite outputs the frontend to `dist/`. The Express API is a separate Node service. Build the API with:
+Vite outputs the frontend to `dist/`. Build the local Express API with:
 
 ```bash
 npm run server:build
 ```
 
 ## Important deployment notes
-- Deploy the Vite `dist/` folder to a static host such as Netlify, Vercel or GitHub Pages.
-- Deploy the Express API separately to a Node hosting provider if you need the API routes online.
-- Set `CLIENT_ORIGIN` to your deployed frontend origin on the API host.
-- Set the EmailJS `VITE_...` values in your frontend host's build environment, then rebuild.
-- The contact form sends directly through EmailJS; the Express API currently provides a health endpoint and project data endpoint. It does not store messages or send email.
-- Configure EmailJS allowed origins / domain restrictions in its dashboard when deploying.
+- Deploy the project to Vercel. The `api/contact.ts` function serves `POST /api/contact`; local development uses the Express API.
+- In Vercel Project Settings → Environment Variables, set `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY`, and `CLIENT_ORIGIN` (for example, `https://saurav-react-portfolio.vercel.app`). Set them for Production, then redeploy.
+- Configure EmailJS template variables `from_name`, `reply_to`, `subject`, and `message`. Keep the template's **To Email** set to your inbox.
+- The contact route validates input and applies basic per-instance throttling. Protect your EmailJS account with usage limits and monitor usage.
 - Update placeholder social URLs and add your real resume PDF at `public/Saurav_Verma_Resume.pdf`.
 - Verify experience dates, titles, education details and contact information before publishing.
 
 ## Security / scope
-No database, paid AI API, or AI token is used. Express includes Helmet, CORS and a basic API rate limit. EmailJS public identifiers are intended for browser use; protect your EmailJS account with its domain restrictions and dashboard limits.
+No database, paid AI API, or AI token is used. Express includes Helmet, CORS and API rate limits. EmailJS credentials are used by the backend only; never expose the private key in frontend code or a `VITE_` variable. Protect your EmailJS account with usage limits and monitor usage.
